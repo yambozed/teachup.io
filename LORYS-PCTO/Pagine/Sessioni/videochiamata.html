@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Videochiamata | TeachUp</title>
+  
+  <link rel="stylesheet" href="videochiamata.css">
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="https://meet.jit.si/external_api.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBqsZJRx4G0swuOj7bNAazhnFb4cqeR7XQ",
+      authDomain: "teachup-62984.firebaseapp.com",
+      projectId: "teachup-62984",
+      storageBucket: "teachup-62984.firebasestorage.app",
+      messagingSenderId: "489486073804",
+      appId: "1:489486073804:web:634545fbdbaeadaaf1a769"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+  </script>
+</head>
+<body>
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <p>Caricamento videochiamata...</p>
+    <button id="forceReload" class="reload-button">
+      <i class="fas fa-sync-alt"></i> Riprova
+    </button>
+  </div>
+  
+  <div id="toast" class="toast"></div>
+  
+  <div id="disconnectWarning" class="disconnect-warning">
+    <i class="fas fa-exclamation-triangle"></i>
+    <span>Problemi di connessione. Riconnessione in corso...</span>
+  </div>
+  
+  <!-- Modal per la password -->
+  <div id="passwordModal" class="modal">
+    <div class="modal-content">
+      <h3>Inserisci la password</h3>
+      <p>Questa stanza è privata e protetta da password. Inserisci la password per continuare.</p>
+      <input type="password" id="passwordInput" class="password-input" placeholder="Password">
+      <button id="submitPassword" class="submit-button">Accedi</button>
+    </div>
+  </div>
+  
+  <div class="main-container">
+    <div id="jitsi-container"></div>
+    
+    <div id="chatContainer" class="chat-container hidden">
+      <div class="chat-header">
+        <span>Chat della sessione</span>
+        <span style="cursor: pointer;" onclick="toggleChat()">×</span>
+      </div>
+      <div id="chatMessages" class="chat-messages"></div>
+      <div class="chat-input-container">
+        <input type="text" id="chatInput" class="chat-input" placeholder="Scrivi un messaggio..." onkeypress="handleKeyPress(event)">
+        <button class="chat-send" onclick="sendMessage()">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </div>
+      <div class="chat-debug">
+        <button class="debug-button" onclick="testChatConnection()">
+          <i class="fas fa-sync"></i> Verifica chat
+        </button>
+        <button class="debug-button" onclick="clearChatMessages()">
+          <i class="fas fa-trash"></i> Pulisci chat
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <button id="toggleChatBtn" class="toggle-chat" onclick="toggleChat()">
+    <i class="fas fa-comments"></i>
+    <span id="chatBadge" class="chat-badge">0</span>
+  </button>
+  
+  <button id="exitButton" class="exit-button" onclick="exitSession()">
+    <i class="fas fa-sign-out-alt"></i> Esci
+  </button>
+  
+  <script src="videochiamata.js"></script>
+</body>
+</html>

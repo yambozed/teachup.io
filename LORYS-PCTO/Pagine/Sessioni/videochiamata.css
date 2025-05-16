@@ -1,0 +1,578 @@
+/* Stili base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+:root {
+  --primary: #6200ea;
+  --primary-dark: #3700b3;
+  --primary-light: #7c43ea;
+  --text-light: #ffffff;
+  --text-dark: #333333;
+  --bg-light: #f9f9f9;
+  --border-light: #dddddd;
+  --error: #f44336;
+  --success: #4caf50;
+}
+
+body {
+  height: 100vh;
+  overflow: hidden;
+  background-color: #f5f5f5;
+}
+
+/* Layout principale */
+.main-container {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  position: relative;
+}
+
+/* Container per la videochiamata */
+#jitsi-container {
+  flex: 1;
+  height: 100vh;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: width 0.3s ease;
+}
+
+/* Chat laterale */
+.chat-container {
+  width: 350px;
+  height: 100vh;
+  background: var(--bg-light);
+  border-left: 1px solid var(--border-light);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease, width 0.3s ease;
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 10; /* Assicura che la chat sia sopra ad altri elementi */
+}
+
+.chat-container.hidden {
+  transform: translateX(350px);
+}
+
+.chat-header {
+  padding: 15px;
+  background: var(--primary);
+  color: var(--text-light);
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--primary-dark);
+  z-index: 2; /* Header sempre visibile */
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 15px;
+  background-color: #ffffff;
+  min-height: 200px; /* Assicura che la chat abbia sempre un'altezza minima visibile */
+  display: block !important; /* Assicura che la chat sia sempre visibile */
+  position: relative; /* Importante per posizionamento corretto dei messaggi */
+}
+
+.chat-input-container {
+  padding: 15px;
+  border-top: 1px solid var(--border-light);
+  display: flex;
+  background-color: var(--bg-light);
+}
+
+.chat-input {
+  flex: 1;
+  padding: 12px 15px;
+  border: 1px solid var(--border-light);
+  border-radius: 20px;
+  margin-right: 10px;
+  font-size: 14px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.chat-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(98, 0, 234, 0.2);
+}
+
+.chat-send {
+  background: var(--primary);
+  color: var(--text-light);
+  border: none;
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 16px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.chat-send:hover {
+  background: var(--primary-light);
+  transform: scale(1.05);
+}
+
+.chat-send:active {
+  transform: scale(0.95);
+}
+
+/* Stile messaggi */
+.message {
+  margin-bottom: 15px;
+  max-width: 85%;
+  animation: fadeIn 0.3s ease;
+  position: relative; /* Importante per posizionamento */
+  clear: both; /* Assicura che ogni messaggio sia su una nuova riga */
+  display: block; /* Assicura che il messaggio sia visualizzato come blocco */
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.message-sender {
+  font-weight: 600;
+  font-size: 12px;
+  margin-bottom: 4px;
+  color: #555;
+}
+
+.message-text {
+  padding: 10px 14px;
+  border-radius: 16px;
+  display: inline-block;
+  word-break: break-word;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  line-height: 1.4;
+  max-width: 100%; /* Assicura che il testo non fuoriesca dal contenitore */
+  min-width: 80px; /* Dimensione minima per i piccoli messaggi */
+}
+
+.message-time {
+  font-size: 10px;
+  opacity: 0.7;
+  margin-top: 4px;
+}
+
+.message.outgoing {
+  margin-left: auto;
+  text-align: right;
+  float: right; /* Posiziona i messaggi in uscita a destra */
+}
+
+.message.incoming {
+  float: left; /* Posiziona i messaggi in entrata a sinistra */
+}
+
+.message.incoming .message-text {
+  background: #e9e9e9;
+  border-radius: 16px 16px 16px 0;
+}
+
+.message.outgoing .message-text {
+  background: var(--primary);
+  color: var(--text-light);
+  border-radius: 16px 16px 0 16px;
+}
+
+.message.system {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 90%;
+  float: none; /* I messaggi di sistema sono centrati */
+  clear: both; /* Assicura che il messaggio di sistema sia su una nuova riga */
+}
+
+.message.system .message-text {
+  background: #f0f2f5;
+  color: #666;
+  font-size: 12px;
+  border-radius: 15px;
+  padding: 8px 16px;
+}
+
+/* Pulsante chat */
+.toggle-chat {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: var(--primary);
+  color: var(--text-light);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 22px;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+  transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.toggle-chat:hover {
+  background: var(--primary-light);
+  transform: translateY(-2px);
+}
+
+.toggle-chat:active {
+  transform: translateY(0) scale(0.95);
+}
+
+/* Badge per notifica nuovi messaggi */
+.chat-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: var(--error);
+  color: white;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  display: none;
+}
+
+.chat-badge.show {
+  display: flex;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+/* Overlay di caricamento */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.95);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+.loading-overlay.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.spinner {
+  width: 60px;
+  height: 60px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Toast per notifiche */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(33, 33, 33, 0.9);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-size: 14px;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s;
+  min-width: 200px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.toast.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, -10px);
+}
+
+.toast.success {
+  background: rgba(76, 175, 80, 0.95);
+}
+
+.toast.error {
+  background: rgba(244, 67, 54, 0.95);
+}
+
+/* Pulsante di uscita */
+.exit-button {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: var(--error);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.exit-button:hover {
+  background: #e53935;
+  transform: translateY(-2px);
+}
+
+.exit-button:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Modale per la password */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 25px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  color: var(--primary);
+  margin-bottom: 15px;
+}
+
+.password-input {
+  width: 100%;
+  padding: 12px 15px;
+  margin: 15px 0;
+  border: 1px solid var(--border-light);
+  border-radius: 5px;
+  font-size: 16px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.password-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(98, 0, 234, 0.2);
+}
+
+.submit-button {
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.submit-button:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-2px);
+}
+
+.submit-button:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Pulsante di ricarica */
+.reload-button {
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.reload-button:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-2px);
+}
+
+.reload-button:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Messaggio di disconnessione */
+.disconnect-warning {
+  position: fixed;
+  top: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 152, 0, 0.9);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  z-index: 100;
+  display: none;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+.disconnect-warning.show {
+  display: flex;
+}
+
+/* Animazione pulsante nuova */
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+  40% {transform: translateY(-10px);}
+  60% {transform: translateY(-5px);}
+}
+
+.bounce {
+  animation: bounce 2s ease infinite;
+}
+
+/* Stili per il debug della chat */
+.chat-debug {
+  padding: 8px;
+  background-color: #f0f0f0;
+  text-align: center;
+  border-top: 1px solid #ddd;
+}
+
+.debug-button {
+  background-color: #e0e0e0;
+  color: #333;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  gap: 5px;
+}
+
+.debug-button:hover {
+  background-color: #d5d5d5;
+}
+
+/* Responsiveness */
+@media screen and (max-width: 768px) {
+  .chat-container {
+    position: fixed;
+    right: 0;
+    width: 300px;
+    z-index: 50;
+  }
+  
+  .chat-container.hidden {
+    transform: translateX(300px);
+  }
+  
+  .exit-button {
+    right: 20px;
+    top: 20px;
+    padding: 8px 15px;
+    font-size: 14px;
+  }
+  
+  .toggle-chat {
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+  }
+}
+
+/* Schermo molto piccolo */
+@media screen and (max-width: 480px) {
+  .chat-container {
+    width: 100%;
+    transform: translateX(100%);
+  }
+  
+  .chat-container.hidden {
+    transform: translateX(100%);
+  }
+  
+  #jitsi-container {
+    width: 100%;
+  }
+  
+  .modal-content {
+    width: 95%;
+    padding: 20px;
+  }
+}
+
+/* Aggiungi effetto shake per errori password */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+.shake {
+  animation: shake 0.5s ease;
+  border-color: var(--error) !important;
+}

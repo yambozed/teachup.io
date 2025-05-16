@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configura Videochiamata | TeachUp</title>
+  
+  <!-- Firebase Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  
+  <!-- Font -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="configura_videochiamata.css">
+  
+  <!-- Inizializzazione Firebase -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBqsZJRx4G0swuOj7bNAazhnFb4cqeR7XQ",
+      authDomain: "teachup-62984.firebaseapp.com",
+      projectId: "teachup-62984",
+      storageBucket: "teachup-62984.firebasestorage.app",
+      messagingSenderId: "489486073804",
+      appId: "1:489486073804:web:634545fbdbaeadaaf1a769"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    
+    // Inizializza Firestore
+    const db = firebase.firestore();
+  </script>
+</head>
+<body>
+  <!-- Toast per le notifiche -->
+  <div id="toast" class="toast"><i class="fas fa-info-circle"></i><span id="toastMessage"></span></div>
+  
+  <!-- Overlay con spinner per caricamento -->
+  <div id="spinnerOverlay" class="spinner-overlay">
+    <div class="spinner"></div>
+  </div>
+  
+  <div class="container">
+    <div class="logo">
+      <i class="fas fa-video"></i>
+      <span>TeachUp</span>
+    </div>
+    
+    <h2>Configura la Videochiamata</h2>
+    
+    <form id="callForm" onsubmit="return false;">
+      <div class="form-group">
+        <label for="sessionName">Nome Sessione</label>
+        <div class="input-icon">
+          <input type="text" id="sessionName" placeholder="Es: Lezione di matematica">
+          <i class="fas fa-chalkboard-teacher"></i>
+        </div>
+        <div id="sessionNameError" class="error-message">
+          <i class="fas fa-exclamation-circle"></i> Inserisci un nome valido (minimo 3 caratteri)
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="participants">Numero massimo di Partecipanti</label>
+        <div class="input-icon">
+          <input type="number" id="participants" min="1" max="50" value="10" placeholder="Max 50 partecipanti">
+          <i class="fas fa-users"></i>
+        </div>
+        <div id="participantsError" class="error-message">
+          <i class="fas fa-exclamation-circle"></i> Inserisci un numero valido (1-50)
+        </div>
+        <div class="badge">
+          <i class="fas fa-info-circle"></i> Consigliato: 10-15 per prestazioni ottimali
+        </div>
+      </div>
+      
+      <div class="toggle-wrapper">
+        <label for="privacy">Sessione Privata</label>
+        <div class="toggle" id="privacyToggle" onclick="togglePrivacy(this)"></div>
+        <input type="hidden" id="privacy" value="public">
+      </div>
+      
+      <!-- Campo per la password (visibile solo per sessioni private) -->
+      <div class="form-group" id="passwordContainer" style="display: none;">
+        <label for="sessionPassword">Password della Sessione</label>
+        <div class="input-icon">
+          <input type="password" id="sessionPassword" placeholder="Imposta una password per la sessione">
+          <i class="fas fa-lock"></i>
+        </div>
+        <div id="sessionPasswordError" class="error-message">
+          <i class="fas fa-exclamation-circle"></i> Inserisci una password valida (minimo 4 caratteri)
+        </div>
+        <div class="badge">
+          <i class="fas fa-info-circle"></i> La password protegge l'accesso alla tua videochiamata privata
+        </div>
+      </div>
+      
+      <div class="toggle-wrapper">
+        <label for="enableChat">Abilita Chat</label>
+        <div class="toggle active" id="chatToggle" onclick="toggleSwitch(this, 'enableChat')"></div>
+        <input type="hidden" id="enableChat" value="true">
+      </div>
+      
+      <button id="submitButton" class="button" onclick="startCall()">
+        <i class="fas fa-video"></i> Avvia Videochiamata
+      </button>
+    </form>
+  </div>
+  
+  <script src="configura_videochiamata.js"></script>
+</body>
+</html>

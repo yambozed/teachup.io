@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Teach-Up</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+  <style>
+    :root {
+      --primary: #4361ee;
+      --secondary: #3f37c9;
+      --accent: #4cc9f0;
+      --light: #f8f9fa;
+      --dark: #212529;
+      --success: #4ade80;
+      --warning: #fbbf24;
+      --danger: #f87171;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+      --shadow-md: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+      --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+      --transition: all 0.3s ease;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, var(--gray-100) 0%, var(--light) 100%);
+      color: var(--dark);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-weight: 700;
+      font-size: 1.5rem;
+    }
+    
+    .logo img {
+      height: 40px;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+      transition: var(--transition);
+    }
+    
+    .logo img:hover {
+      transform: scale(1.05);
+    }
+    
+    #user-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 500;
+    }
+    
+    #user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .logout {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: var(--transition);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .logout:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+      flex: 1;
+    }
+    
+    .welcome-section {
+      text-align: center;
+      margin-bottom: 3rem;
+      animation: fadeIn 0.8s ease;
+    }
+    
+    .welcome-section h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(to right, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline-block;
+    }
+    
+    .welcome-section p {
+      color: var(--dark);
+      opacity: 0.8;
+      font-size: 1.1rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+    
+    .stat-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      transition: var(--transition);
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 1rem;
+      font-size: 1.5rem;
+    }
+    
+    .stat-icon.blue {
+      background: rgba(67, 97, 238, 0.1);
+      color: var(--primary);
+    }
+    
+    .stat-icon.green {
+      background: rgba(74, 222, 128, 0.1);
+      color: var(--success);
+    }
+    
+    .stat-icon.yellow {
+      background: rgba(251, 191, 36, 0.1);
+      color: var(--warning);
+    }
+    
+    .stat-info h3 {
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+    
+    .stat-info p {
+      color: var(--dark);
+      opacity: 0.6;
+      font-size: 0.875rem;
+    }
+    
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+    }
+    
+    .card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(to right, var(--primary), var(--accent));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: var(--transition);
+    }
+    
+    .card:hover {
+      transform: translateY(-10px);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .card:hover::before {
+      transform: scaleX(1);
+    }
+    
+    .card i {
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
+      transition: var(--transition);
+      color: var(--primary);
+    }
+    
+    .card:hover i {
+      transform: scale(1.15);
+      color: var(--accent);
+    }
+    
+    .card h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+    
+    .card p {
+      color: var(--dark);
+      opacity: 0.7;
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .card-actions {
+      margin-top: auto;
+      width: 100%;
+    }
+    
+    .btn {
+      background: var(--gray-100);
+      color: var(--dark);
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-block;
+    }
+    
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      width: 100%;
+    }
+    
+    .btn-primary:hover {
+      background: var(--secondary);
+      transform: translateY(-2px);
+    }
+    
+    footer {
+      background: var(--dark);
+      color: white;
+      padding: 1.5rem;
+      text-align: center;
+      margin-top: 3rem;
+    }
+    
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+    
+    .footer-links a {
+      color: var(--gray-300);
+      text-decoration: none;
+      transition: var(--transition);
+    }
+    
+    .footer-links a:hover {
+      color: white;
+    }
+    
+    .copyright {
+      color: var(--gray-300);
+      font-size: 0.875rem;
+    }
+    
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+    
+    .notification {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: white;
+      border-radius: 12px;
+      padding: 1rem;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      transform: translateX(calc(100% + 2rem));
+      transition: var(--transition);
+      z-index: 1000;
+    }
+    
+    .notification.show {
+      transform: translateX(0);
+    }
+    
+    .notification-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(67, 97, 238, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+    }
+    
+    .notification-text {
+      flex: 1;
+    }
+    
+    .notification-text h4 {
+      font-size: 1rem;
+      margin-bottom: 0.25rem;
+    }
+    
+    .notification-text p {
+      color: var(--dark);
+      opacity: 0.7;
+      font-size: 0.875rem;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      header {
+        padding: 1rem;
+      }
+      
+      .container {
+        padding: 1.5rem;
+      }
+      
+      .welcome-section h1 {
+        font-size: 2rem;
+      }
+      
+      .welcome-section p {
+        font-size: 1rem;
+      }
+      
+      .grid {
+        gap: 1.5rem;
+      }
+      
+      .stat-card {
+        padding: 1rem;
+      }
+      
+      .stat-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.25rem;
+      }
+      
+      .stat-info h3 {
+        font-size: 1.5rem;
+      }
+      
+      .footer-content {
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+      
+      .notification {
+        left: 1rem;
+        right: 1rem;
+        bottom: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <img src="../Immagini/Logo.png" alt="Teach-Up Logo">
+ 
+    </div>
+    <div id="user-info">
+      <div id="user-avatar">TU</div>
+      <span id="user-name">Benvenuto!</span>
+    </div>
+    <button class="logout" onclick="logout()">
+      <i class="fas fa-sign-out-alt"></i> Esci
+    </button>
+    <link rel="stylesheet" href="../Sessioni/style.css">
+  </header>
+
+  <div class="container">
+    <div class="welcome-section">
+      <h1>La tua Dashboard</h1>
+      <p>Benvenuto nella tua area personale Teach-Up. Accedi facilmente a tutte le funzionalità e monitora i tuoi progressi.</p>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon blue">
+          <i class="fas fa-clock"></i>
+        </div>
+        <div class="stat-info">
+          <h3>12h</h3>
+          <p>Ore di studio</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green">
+          <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-info">
+          <h3>5</h3>
+          <p>Sessioni attive</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon yellow">
+          <i class="fas fa-star"></i>
+        </div>
+        <div class="stat-info">
+          <h3>85%</h3>
+          <p>Tasso di completamento</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card" onclick="location.href='../Sessioni/Sessioni.html'">
+        <i class="fas fa-calendar-alt"></i>
+        <h3>Sessioni di Studio</h3>
+        <p>Crea nuove sessioni di studio o unisciti a quelle già attive. Pianifica il tuo percorso di apprendimento in modo efficace.</p>
+        <div class="card-actions">
+          <button class="btn btn-primary">Accedi alle Sessioni</button>
+        </div>
+      </div>
+
+      <div class="card" onclick="location.href='../Chat/Chat.html'">
+        <i class="fas fa-comments"></i>
+        <h3>Chat</h3>
+        <p>Comunica in tempo reale con il tuo gruppo di studio. Condividi idee, fai domande e collabora con altri studenti.</p>
+        <div class="card-actions">
+          <button class="btn btn-primary">Apri la Chat</button>
+        </div>
+      </div>
+
+      <div class="card" onclick="location.href='../Statistiche/Statistiche.html'">
+        <i class="fas fa-chart-line"></i>
+        <h3>Statistiche</h3>
+        <p>Monitora i tuoi progressi e visualizza statistiche dettagliate sul tuo apprendimento. Ottimizza il tuo metodo di studio.</p>
+        <div class="card-actions">
+          <button class="btn btn-primary">Visualizza Statistiche</button>
+        </div>
+      </div>
+
+      <div class="card" onclick="location.href='../Account/Account.html'">
+        <i class="fas fa-user-cog"></i>
+        <h3>Il Mio Account</h3>
+        <p>Gestisci le tue informazioni personali, modifica il profilo e personalizza le impostazioni del tuo account.</p>
+        <div class="card-actions">
+          <button class="btn btn-primary">Gestisci Account</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="notification" id="notification">
+    <div class="notification-icon">
+      <i class="fas fa-bell"></i>
+    </div>
+    <div class="notification-text">
+      <h4>Nuova sessione disponibile</h4>
+      <p>Una nuova sessione di studio è stata creata per la materia "Matematica"</p>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-content">
+      <div class="copyright">
+        &copy; 2025 Teach-Up. Tutti i diritti riservati.
+      </div>
+      <div class="footer-links">
+        <a href="#">Privacy</a>
+        <a href="#">Termini</a>
+        <a href="#">Supporto</a>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBqsZJRx4G0swuOj7bNAazhnFb4cqeR7XQ",
+      authDomain: "teachup-62984.firebaseapp.com",
+      projectId: "teachup-62984",
+      storageBucket: "teachup-62984.appspot.com",
+      messagingSenderId: "489486073804",
+      appId: "1:489486073804:web:634545fbdbaeadaaf1a769"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const userInfo = document.getElementById("user-name");
+    const userAvatar = document.getElementById("user-avatar");
+
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        userInfo.textContent = user.displayName || user.email;
+        
+        // Create avatar with initials
+        if (user.displayName) {
+          const initials = user.displayName
+            .split(' ')
+            .map(name => name[0])
+            .join('')
+            .toUpperCase()
+            .substring(0, 2);
+          userAvatar.textContent = initials;
+        } else if (user.email) {
+          userAvatar.textContent = user.email[0].toUpperCase();
+        }
+      } else {
+        window.location.href = "../../Login/prova.html";
+      }
+    });
+
+    window.logout = function() {
+      signOut(auth).then(() => {
+        window.location.href = "../../Login/prova.html";
+      });
+    }
+    
+    // Show notification after 3 seconds
+    setTimeout(() => {
+      document.getElementById('notification').classList.add('show');
+      
+      // Hide notification after 5 seconds
+      setTimeout(() => {
+        document.getElementById('notification').classList.remove('show');
+      }, 5000);
+    }, 3000);
+  </script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
+</body>
+</html>

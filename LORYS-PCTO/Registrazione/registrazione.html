@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrazione - Teach-Up</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="stilereg.css">
+</head>
+<body>
+    <!-- Sfondo con bolle animate -->
+    <div class="bubbles">
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+    </div>
+
+    <div class="container">
+        <div class="logo">
+            <img src="../Pagine/Immagini/LOGO2.png" alt="Teach-Up Logo">
+        </div>
+
+        <h2>Registrati</h2>
+
+        <form id="register-form">
+            <div class="input-group">
+                <input type="text" id="nome" name="nome" required placeholder=" "/>
+                <label for="nome">Nome</label>
+            </div>
+
+            <div class="input-group">
+                <input type="text" id="cognome" name="cognome" required placeholder=" "/>
+                <label for="cognome">Cognome</label>
+            </div>
+
+            <div class="input-group">
+                <input type="email" id="email" name="email" required placeholder=" "/>
+                <label for="email">Email</label>
+            </div>
+
+            <div class="input-group">
+                <input type="password" id="password" name="password" required placeholder=" "/>
+                <label for="password">Password</label>
+                <i class="far fa-eye" id="toggle-password" onclick="togglePassword('password', 'toggle-password')"></i>
+            </div>
+
+            <div class="input-group">
+                <input type="password" id="confirm-password" name="confirm-password" required placeholder=" "/>
+                <label for="confirm-password">Conferma Password</label>
+                <i class="far fa-eye" id="toggle-confirm-password" onclick="togglePassword('confirm-password', 'toggle-confirm-password')"></i>
+            </div>
+
+            <div class="checkbox-group">
+                <input type="checkbox" id="terms" required>
+                <label for="terms">Accetto i Termini e le Condizioni</label>
+            </div>
+
+            <button type="submit" class="submit-btn">Registrati</button>
+        </form>
+
+        <div class="separator">
+            <span>oppure</span>
+        </div>
+
+        <!-- Registrazione con Google -->
+        <div class="social-login">
+            <button type="button" class="social-btn google-btn" onclick="signInWithGoogle()">
+                <i class="fab fa-google"></i> Continua con Google
+            </button>
+        </div>
+        
+        <p class="login-link">Hai già un account? <a href="../Login/prova.html">Accedi</a></p>
+    </div>
+
+    <!-- Inizializzazione Firebase con moduli ES -->
+    <script type="module">
+        // Import delle funzioni necessarie dai SDK Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Configurazione Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBqsZJRx4G0swuOj7bNAazhnFb4cqeR7XQ",
+            authDomain: "teachup-62984.firebaseapp.com",
+            projectId: "teachup-62984",
+            storageBucket: "teachup-62984.firebasestorage.app",
+            messagingSenderId: "489486073804",
+            appId: "1:489486073804:web:634545fbdbaeadaaf1a769",
+            measurementId: "G-FQCK8Z4N0R",
+            webClientId: "489486073804-luifekv4u2soh6ojou315mtolokni1ba.apps.googleusercontent.com"
+        };
+
+        // Inizializza Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Rendi i servizi Firebase disponibili globalmente
+        window.firebaseAuth = auth;
+        window.firebaseDB = db;
+        window.createUser = async (email, password) => {
+            const { createUserWithEmailAndPassword } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js");
+            return createUserWithEmailAndPassword(auth, email, password);
+        };
+        window.setDocument = async (collection, docId, data) => {
+            await setDoc(doc(db, collection, docId), data);
+        };
+        window.sendVerificationEmail = async (user) => {
+            await sendEmailVerification(user);
+        };
+    </script>
+
+    <!-- Script per la funzione toggle password -->
+    <script>
+        function togglePassword(inputId, iconId) {
+            var passwordInput = document.getElementById(inputId);
+            var icon = document.getElementById(iconId);
+
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            } else {
+                passwordInput.type = "password";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            }
+        }
+    </script>
+
+    <!-- Script per la gestione della registrazione -->
+    <script>
+        // Funzione per la registrazione dell'utente
+        async function registerUser(event) {
+            event.preventDefault();
+
+            // Ottieni i valori dai campi del form
+            let nome = document.getElementById("nome").value;
+            let cognome = document.getElementById("cognome").value;
+            let email = document.getElementById("email").value;
+            let password = document.getElementById("password").value;
+            let confirmPassword = document.getElementById("confirm-password").value;
+            let termsAccepted = document.getElementById("terms").checked;
+
+            // Validazione password
+            if (password !== confirmPassword) {
+                alert("⚠️ Le password non coincidono!");
+                return;
+            }
+
+            // Validazione termini e condizioni
+            if (!termsAccepted) {
+                alert("⚠️ Devi accettare i Termini e le Condizioni per registrarti!");
+                return;
+            }
+
+            try {
+                // Creazione utente con Firebase Auth
+                const userCredential = await window.createUser(email, password);
+                const user = userCredential.user;
+                
+                // Invia email di verifica
+                await window.sendVerificationEmail(user);
+                
+                // Salva i dati utente aggiuntivi in Firestore
+                await window.setDocument("utenti", user.uid, {
+                    nome: nome,
+                    cognome: cognome,
+                    email: email,
+                    uid: user.uid,
+                    emailVerificata: false,
+                    dataRegistrazione: new Date()
+                });
+
+                // Registrazione completata con successo
+                alert("✅ Registrazione completata con successo! Ti abbiamo inviato una email di verifica. Per favore, verifica il tuo indirizzo email prima di accedere.");
+                window.location.href = "../Login/prova.html";
+            } catch (error) {
+                console.error(error);
+                alert("❌ Errore nella registrazione: " + error.message);
+            }
+        }
+
+       // Funzione per il login con Google
+    async function signInWithGoogle() {
+        try {
+            const { GoogleAuthProvider, signInWithPopup } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js");
+            const provider = new GoogleAuthProvider();
+            
+            // Aggiungi gli scope necessari
+            provider.addScope('email');
+            provider.addScope('profile');
+            
+            const result = await signInWithPopup(window.firebaseAuth, provider);
+            const user = result.user;
+            const credential = GoogleAuthProvider.credentialFromResult(result);
+            const token = credential.accessToken;
+            
+            // Salva i dati utente in Firestore
+            await window.setDocument("utenti", user.uid, {
+                nome: user.displayName?.split(' ')[0] || '',
+                cognome: user.displayName?.split(' ')[1] || '',
+                email: user.email,
+                uid: user.uid,
+                dataRegistrazione: new Date(),
+                photoURL: user.photoURL
+            });
+
+            window.location.href = "../Login/prova.html";
+        } catch (error) {
+            console.error(error);
+            
+            // Gestione specifica degli errori
+            if (error.code === 'auth/popup-blocked') {
+                alert("❌ Il popup è stato bloccato. Per favore, permetti i popup per questo sito.");
+            } else if (error.code === 'auth/popup-closed-by-user') {
+                alert("❌ Il processo di login è stato interrotto.");
+            } else {
+                alert("❌ Errore durante l'accesso con Google: " + error.message);
+            }
+        }
+    }
+
+
+
+        // Aggiungi l'event listener al form quando il DOM è completamente caricato
+        document.addEventListener("DOMContentLoaded", function() {
+            let form = document.getElementById("register-form");
+            if (form) {
+                form.addEventListener("submit", registerUser);
+            }
+        });
+    </script>
+</body>
+</html>

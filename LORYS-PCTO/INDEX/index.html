@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teach-Up</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="Inizio.STYLE.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Stile inline per assicurarsi che tutto funzioni */
+        .animated-background {
+            position: absolute;
+            width: 100%;
+            height: 100vh;
+            background: url('../Pagine/Immagini/SFONDO1PG.jpg') no-repeat center center/cover;
+            filter: brightness(0.5);
+            z-index: -2;
+            animation: zoomBackground 15s infinite alternate ease-in-out;
+        }
+        
+        /* Fallback in caso di immagine non caricata */
+        .animated-background.fallback {
+            background: linear-gradient(135deg, #001428, #0a4c82);
+        }
+        
+        /* Assicuriamo che il canvas sia assolutamente visibile */
+        #particle-canvas {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: -1 !important; /* Aumentato da -3 a -1 per essere sicuri che sia sopra lo sfondo */
+            pointer-events: none !important;
+            display: block !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            background-color: transparent !important;
+        }
+        
+        /* Assicuriamo che la landing section mostri le particelle */
+        .landing-section {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: 100;
+            background: rgba(17, 17, 17, 0.7); /* Reso trasparente per vedere le particelle */
+            transition: transform 0.8s ease-in-out;
+        }
+        
+        /* Overlay modificato per non bloccare le particelle */
+        .hero-overlay {
+            background: rgba(0, 0, 0, 0.3) !important; /* Reso più trasparente */
+        }
+    </style>
+</head>
+<body>
+    <!-- Landing Section -->
+    <div class="landing-section">
+        <!-- Canvas delle particelle - spostato in cima per massima visibilità -->
+        <canvas id="particle-canvas"></canvas>
+        
+        <nav class="navbar">
+            <div class="nav-logo">
+                <a href="#home">Teach-Up</a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="../Login/prova.html">Home</a></li>
+                <li><a href="#about">Chi Siamo</a></li>
+                <li><a href="#services">Servizi</a></li>
+                <li><a href="#contact">Contatti</a></li>
+            </ul>
+            <div class="nav-auth">
+                <a href="../Login/prova.html" class="login-btn">Accedi</a>
+            </div>
+        </nav>
+
+        <div class="hero">
+            <div class="animated-background"></div>
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <img src="../Pagine/Immagini/LOGO2.png" alt="Teach-Up Logo" class="hero-logo">
+            </div>
+            <div class="scroll-indicator">
+                Scorri verso il basso
+                <div class="scroll-arrow">↓</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Home Page Content -->
+    <div class="home-page-section">
+        <div id="menuMobile" class="menu-mobile">
+            <span class="close-menu" onclick="toggleMenu()">&times;</span>
+            <div class="logo-container">
+                <img src="../Pagine/Immagini/Logo.png" alt="TeachUp Logo" class="logo">
+            </div>
+            <nav>
+                <a href="../Pagine/Home-Page/Home-Page.html">🏠 Home</a>
+                <a href="../Pagine/Sessioni/Sessioni.html">📚 Sessioni</a>
+                <a href="../Pagine/Chat/Chat.html">💬 Chat</a>
+                <a href="../Pagine/Statistiche/Statistiche.html">📊 Statistiche</a>
+                <a href="../Pagine/Account/Account.html">👤 Account</a>
+            </nav>
+        </div>
+
+        <div class="menu-toggle" onclick="toggleMenu()">☰</div>
+
+        <!-- Hero Section -->
+        <section class="home-hero">
+            <div class="hero-content">
+                <h1>📚 Benvenuto su TeachUp!</h1>
+                <p>Organizza e partecipa a sessioni di studio online in modo facile e veloce.</p>
+                <a href="../Login/prova.html" class="btn-primary">🚀 Inizia Ora</a>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="about">
+            <h2>🔥 Come Funziona TeachUp</h2>
+            <div class="about-content">
+                <div class="about-item">
+                    <h3>📅 Crea Sessioni di Studio</h3>
+                    <p>Organizza sessioni di studio online con i tuoi amici o colleghi.</p>
+                </div>
+                <div class="about-item">
+                    <h3>🔗 Unisciti a Sessioni</h3>
+                    <p>Partecipa facilmente inserendo il codice di accesso.</p>
+                </div>
+                <div class="about-item">
+                    <h3>⏳ Rimani Concentrato</h3>
+                    <p>Usa il timer integrato per migliorare la produttività.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Testimonials -->
+        <section id="services" class="testimonials">
+            <h2>💬 Cosa Dicono gli Utenti</h2>
+            <div class="testimonial-item">
+                <p>"TeachUp mi ha aiutato a organizzare al meglio le mie sessioni di studio!" - Marco</p>
+            </div>
+            <div class="testimonial-item">
+                <p>"Posso condividere facilmente le sessioni con i miei amici!" - Sara</p>
+            </div>
+        </section>
+
+        <footer id="contact">
+            <p>&copy; 2025 TeachUp - App di Studio</p>
+        </footer>
+    </div>
+
+    <!-- Script di correzione percorsi -->
+    <script>
+        // Controllo immagine di sfondo e percorsi
+        document.addEventListener("DOMContentLoaded", function() {
+            console.log("Script di correzione percorsi attivato");
+            
+            // 1. Verifica e correzione immagine di sfondo
+            const backgroundElement = document.querySelector('.animated-background');
+            if (backgroundElement) {
+                // Funzione per verificare se un'immagine esiste
+                function checkImageExistence(imageUrl, callback) {
+                    const img = new Image();
+                    img.onload = function() { callback(true); };
+                    img.onerror = function() { callback(false); };
+                    img.src = imageUrl;
+                }
+                
+                // Estrazione URL immagine attuale
+                const style = window.getComputedStyle(backgroundElement);
+                const bgImage = style.backgroundImage;
+                console.log("Immagine di sfondo attuale:", bgImage);
+                
+                if (bgImage === 'none' || bgImage.includes('missing')) {
+                    console.log("Immagine non caricata, attivo fallback");
+                    backgroundElement.classList.add('fallback');
+                }
+                
+                // Percorsi alternativi da provare
+                const paths = [
+                    '../Pagine/Immagini/SFONDO1PG.jpg',
+                    './Pagine/Immagini/SFONDO1PG.jpg',
+                    '/Pagine/Immagini/SFONDO1PG.jpg',
+                    'Pagine/Immagini/SFONDO1PG.jpg',
+                    '/Immagini/SFONDO1PG.jpg',
+                    './Immagini/SFONDO1PG.jpg',
+                    'Immagini/SFONDO1PG.jpg'
+                ];
+                
+                // Test di tutti i percorsi
+                function tryNextPath(index) {
+                    if (index >= paths.length) {
+                        console.log("Nessun percorso valido trovato, rimango con il fallback");
+                        return;
+                    }
+                    
+                    checkImageExistence(paths[index], function(exists) {
+                        if (exists) {
+                            console.log("Percorso valido trovato:", paths[index]);
+                            backgroundElement.style.backgroundImage = `url('${paths[index]}')`;
+                            backgroundElement.classList.remove('fallback');
+                        } else {
+                            tryNextPath(index + 1);
+                        }
+                    });
+                }
+                
+                // Inizia il test dei percorsi
+                tryNextPath(0);
+            }
+            
+            // 2. Verifica logo principale
+            const heroLogo = document.querySelector('.hero-logo');
+            if (heroLogo && heroLogo.src) {
+                console.log("Verifico logo principale:", heroLogo.src);
+                heroLogo.onerror = function() {
+                    console.log("Errore caricamento logo, provo percorsi alternativi");
+                    const logoAlts = [
+                        '../Pagine/Immagini/LOGO2.png',
+                        './Pagine/Immagini/LOGO2.png',
+                        '/Pagine/Immagini/LOGO2.png',
+                        'Pagine/Immagini/LOGO2.png',
+                        '/Immagini/LOGO2.png',
+                        './Immagini/LOGO2.png',
+                        'Immagini/LOGO2.png'
+                    ];
+                    
+                    function tryLogoPath(idx) {
+                        if (idx >= logoAlts.length) return;
+                        
+                        const testImg = new Image();
+                        testImg.onload = function() {
+                            heroLogo.src = logoAlts[idx];
+                        };
+                        testImg.onerror = function() {
+                            tryLogoPath(idx + 1);
+                        };
+                        testImg.src = logoAlts[idx];
+                    }
+                    
+                    tryLogoPath(0);
+                };
+            }
+            
+            // 3. Verifica logo del menu mobile
+            const mobileLogo = document.querySelector('.logo-container img');
+            if (mobileLogo && mobileLogo.src) {
+                console.log("Verifico logo mobile:", mobileLogo.src);
+                mobileLogo.onerror = function() {
+                    console.log("Errore caricamento logo mobile, provo percorsi alternativi");
+                    const mobileLogoAlts = [
+                        '../Pagine/Immagini/Logo.png',
+                        './Pagine/Immagini/Logo.png',
+                        '/Pagine/Immagini/Logo.png',
+                        'Pagine/Immagini/Logo.png',
+                        '/Immagini/Logo.png',
+                        './Immagini/Logo.png',
+                        'Immagini/Logo.png'
+                    ];
+                    
+                    function tryMobileLogoPath(idx) {
+                        if (idx >= mobileLogoAlts.length) return;
+                        
+                        const testImg = new Image();
+                        testImg.onload = function() {
+                            mobileLogo.src = mobileLogoAlts[idx];
+                        };
+                        testImg.onerror = function() {
+                            tryMobileLogoPath(idx + 1);
+                        };
+                        testImg.src = mobileLogoAlts[idx];
+                    }
+                    
+                    tryMobileLogoPath(0);
+                };
+            }
+        });
+        
+        // Script principale
+        document.addEventListener("DOMContentLoaded", function() {
+            // Link per la Home
+            const homeLinks = document.querySelectorAll(".nav-links a[href='../Login/prova.html']");
+            homeLinks.forEach(link => {
+                link.addEventListener("click", function(event) {
+                    event.preventDefault();
+                    const isLoggedIn = localStorage.getItem('loggedIn');
+                    if (isLoggedIn === "true") {
+                        window.location.href = "../Pagine/Home-Page/Home-Page.html";
+                    } else {
+                        window.location.href = "../Login/prova.html";
+                    }
+                });
+            });
+            
+            // Pulsante Accedi
+            const loginBtn = document.querySelector(".login-btn");
+            if (loginBtn) {
+                loginBtn.addEventListener("click", function(event) {
+                    event.preventDefault();
+                    window.location.href = "../Login/prova.html";
+                });
+            }
+            
+            // Pulsante Inizia Ora
+            const startBtn = document.querySelector(".btn-primary");
+            if (startBtn) {
+                startBtn.addEventListener("click", function(event) {
+                    event.preventDefault();
+                    window.location.href = "../Login/prova.html";
+                });
+            }
+
+            // Gestione scroll
+            let lastScrollTop = 0;
+            const landingSection = document.querySelector('.landing-section');
+            const homePageSection = document.querySelector('.home-page-section');
+            let isTransitioning = false;
+            let hasScrolledDown = false;
+
+            window.addEventListener('scroll', function() {
+                const st = window.scrollY;
+                if (!isTransitioning) {
+                    if (st > lastScrollTop && !hasScrolledDown) {
+                        isTransitioning = true;
+                        hasScrolledDown = true;
+                        landingSection.classList.add('scrolled');
+                        homePageSection.classList.add('visible');
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        setTimeout(() => isTransitioning = false, 800);
+                    } else if (st === 0 && hasScrolledDown) {
+                        isTransitioning = true;
+                        hasScrolledDown = false;
+                        landingSection.classList.remove('scrolled');
+                        homePageSection.classList.remove('visible');
+                        setTimeout(() => isTransitioning = false, 800);
+                    }
+                }
+                lastScrollTop = st;
+            });
+
+            // Menu mobile
+            window.toggleMenu = function() {
+                document.getElementById("menuMobile").classList.toggle("active");
+            };
+        });
+    </script>
+
+    <!-- Nuovo script particelle super-robusto -->
+    <!-- Script particelle con visibilità migliorata ma velocità ottimale -->
+<script>
+// Inizializzazione ottimizzata delle particelle - versione finale
+(function() {
+    console.log("⭐ Inizializzazione particelle - versione finale ottimizzata");
+    
+    // Inizializzazione principale
+    const initParticleSystem = function() {
+        if (window.particleSystemInitialized) return; // Evita doppie inizializzazioni
+        
+        console.log("🔄 Tentativo di inizializzazione particelle...");
+        
+        // 1. Ottieni o crea il canvas
+        let canvas = document.getElementById('particle-canvas');
+        if (!canvas) {
+            console.log("Canvas non trovato, creazione dinamica");
+            canvas = document.createElement('canvas');
+            canvas.id = 'particle-canvas';
+            
+            // Applica inline style con tutti i parametri critici
+            canvas.style.cssText = "position:fixed !important; top:0 !important; left:0 !important; width:100vw !important; height:100vh !important; z-index:-1 !important; pointer-events:none !important; display:block !important; opacity:1 !important; visibility:visible !important; background:transparent !important;";
+            
+            // Inseriscilo come primo figlio della landing-section
+            const container = document.querySelector('.landing-section');
+            if (container) {
+                if (container.firstChild) {
+                    container.insertBefore(canvas, container.firstChild);
+                } else {
+                    container.appendChild(canvas);
+                }
+            } else {
+                document.body.appendChild(canvas);
+            }
+        }
+        
+        // 2. Verifica già inizializzato
+        if (canvas.dataset.initialized === 'true') {
+            console.log("Canvas già inizializzato");
+            window.particleSystemInitialized = true;
+            return;
+        }
+        
+        // 3. Ottieni contesto e verifica supporto
+        let ctx;
+        try {
+            ctx = canvas.getContext('2d', { alpha: true });
+            if (!ctx) {
+                throw new Error("Impossibile ottenere contesto 2D");
+            }
+        } catch (e) {
+            console.error("Errore contesto 2D:", e.message);
+            return;
+        }
+        
+        // 4. Imposta dimensioni
+        function setCanvasSize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            console.log(`Canvas dimensionato: ${canvas.width}x${canvas.height}`);
+        }
+        setCanvasSize();
+        
+        // 5. Crea particelle - QUANTITÀ LEGGERMENTE MAGGIORE
+        const particles = [];
+        const particleCount = 40; // Aumentato da 30 a 40
+        
+        for (let i = 0; i < particleCount; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() * 3.5 + 1.5, // Dimensioni leggermente aumentate
+                speedX: (Math.random() - 0.5) * 0.5, // Velocità mantenuta bassa
+                speedY: (Math.random() - 0.5) * 0.5, // Velocità mantenuta bassa
+                opacity: Math.random() * 0.4 + 0.4, // Opacità aumentata
+                color: "255, 255, 255" // Bianco standard
+            });
+        }
+        
+        // 7. Loop di rendering
+        let animationFrameId = null;
+        
+        function animate() {
+            // Pulisci canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Aggiorna e disegna particelle
+            for (let i = 0; i < particles.length; i++) {
+                const p = particles[i];
+                
+                // Aggiorna posizione
+                p.x += p.speedX;
+                p.y += p.speedY;
+                
+                // Loop ai bordi dello schermo
+                if (p.x < 0) p.x = canvas.width;
+                if (p.x > canvas.width) p.x = 0;
+                if (p.y < 0) p.y = canvas.height;
+                if (p.y > canvas.height) p.y = 0;
+                
+                // Disegna particella con leggero effetto glow
+                // Prima il glow sottile
+                ctx.beginPath();
+                ctx.fillStyle = `rgba(${p.color}, ${p.opacity * 0.3})`;
+                ctx.arc(p.x, p.y, p.size * 1.5, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Poi il punto centrale più brillante
+                ctx.beginPath();
+                ctx.fillStyle = `rgba(${p.color}, ${p.opacity})`;
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // Continua il loop
+            animationFrameId = requestAnimationFrame(animate);
+        }
+        
+        // 8. Gestione visibilità della pagina
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                // Metti in pausa quando non visibile
+                if (animationFrameId) {
+                    cancelAnimationFrame(animationFrameId);
+                    animationFrameId = null;
+                }
+            } else {
+                // Riprendi quando visibile
+                if (!animationFrameId) {
+                    animate();
+                }
+            }
+        });
+        
+        // 9. Gestione resize
+        window.addEventListener('resize', setCanvasSize);
+        
+        // 10. Avvia l'animazione
+        animate();
+        
+        // 11. Marca come inizializzato
+        canvas.dataset.initialized = 'true';
+        window.particleSystemInitialized = true;
+        
+        console.log("✅ Sistema particelle inizializzato con successo!");
+    };
+    
+    // Inizializza in due momenti diversi
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(initParticleSystem, 100);
+    });
+    
+    window.addEventListener('load', function() {
+        setTimeout(initParticleSystem, 500);
+    });
+    
+})();
+</script>
+</body>
+</html>

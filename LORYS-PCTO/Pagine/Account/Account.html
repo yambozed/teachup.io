@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Il Mio Account</title>
+    <link rel="stylesheet" href="styleaccount.css">
+    <script defer src="script.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        /* Stile per il lightbox */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+        }
+
+        .close-lightbox {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 30px;
+            color: white;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Barra di Navigazione -->
+    <!-- Menu mobile -->
+    <div id="menuMobile" class="menu-mobile animate__animated animate__slideInLeft">
+        <span class="close-menu" onclick="toggleMenu()">×</span>
+        <div class="logo-container">
+            <img src="../Immagini/Logo.png" alt="TeachUp Logo" class="logo">
+        </div>
+        <a href="../Home-Page/Home-Page.html">Home</a>
+        <a href="../Sessioni/Sessioni.html">Sessioni</a>
+        <a href="../Chat/Chat.html">Chat</a>
+        <a href="../Account/Account.html">Account</a>
+    </div>
+
+    <div class="gap">
+        <span class="menu-toggle" onclick="toggleMenu()">☰</span>
+    </div>
+
+    <!-- Menu Desktop -->
+    <nav class="navbar">
+        <ul>
+            <li><a href="../Home-Page/Home-Page.html">Home</a></li>
+            <li><a href="../Sessioni/Sessioni.html">Sessioni</a></li>
+            <li><a href="../Chat/Chat.html">Chat</a></li>
+            <li><a href="../Account/Account.html">Account</a></li>
+        </ul>
+    </nav>
+
+    <!-- Contenuto Account -->
+    <div class="container">
+        <h2>Il Mio Account</h2>
+
+        <!-- Sezione Tema -->
+        <div class="theme-toggle">
+            <span>🌞</span>
+            <input type="checkbox" id="theme-switch">
+            <label for="theme-switch"></label>
+            <span>🌙</span>
+        </div>
+
+        <!-- Sezione Profilo -->
+        <div class="profile">
+            <img src="profile.jpg" alt="Foto Profilo" class="profile-pic" id="profile-img">
+            <button class="btn" id="edit-photo">Cambia immagine</button>
+            <input type="file" id="file-input" accept="image/*" style="display:none;">
+        </div>
+
+        <!-- Sezione Informazioni -->
+        <div class="info">
+            <div class="input-group">
+                <label for="name">Nome utente:</label>
+                <input placeholder="Inserisci il tuo nome" type="text" id="name" value="Mario Rossi" disabled>
+            </div>
+            <div class="input-group">
+                <label for="email">Email:</label>
+                <input placeholder="Inserisci la tua Email" type="email" id="email" value="mario.rossi@example.com" disabled>
+            </div>
+        </div>
+
+        <!-- Sezione Impostazioni -->
+        <div class="settings">
+            <h3>Impostazioni</h3>
+            <div class="button-group">
+                <button class="btn" id="edit-info">Modifica</button>
+                <button class="btn" id="delete-info">Elimina</button>
+                <button class="btn" id="save-changes" disabled>Salva Modifiche</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lightbox per ingrandire l'immagine -->
+    <div id="lightbox" class="lightbox">
+        <img src="profile.jpg" alt="Foto ingrandita">
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Menu Mobile
+            const menu = document.getElementById("menuMobile");
+            const menuToggle = document.querySelector(".menu-toggle");
+            const closeMenu = document.querySelector(".close-menu");
+
+            // Funzione per aprire/chiudere il menu mobile
+            function toggleMenu() {
+                menu.style.display = (menu.style.display === "block") ? "none" : "block";
+            }
+
+            // Aggiungi l'evento al pulsante del menu
+            menuToggle.addEventListener("click", (e) => {
+                e.stopPropagation(); // Impedisce la propagazione del clic
+                toggleMenu();
+            });
+
+            // Chiude il menu se si clicca fuori
+            document.addEventListener("click", (event) => {
+                if (menu.style.display === "block" && !menu.contains(event.target) && event.target !== menuToggle) {
+                    menu.style.display = "none";
+                }
+            });
+
+            // Per chiudere il menu anche cliccando sulla "X"
+            closeMenu.addEventListener("click", (e) => {
+                e.stopPropagation();
+                menu.style.display = "none";
+            });
+
+            // Lightbox: Ingrandimento dell'immagine del profilo
+            const profileImg = document.getElementById("profile-img");
+            const lightbox = document.getElementById("lightbox");
+            const lightboxImg = lightbox.querySelector("img");
+
+            // Mostra l'immagine ingrandita
+            profileImg.addEventListener("click", () => {
+                lightbox.style.display = "flex";
+                lightboxImg.src = profileImg.src;
+            });
+
+            // Chiudi il lightbox cliccando fuori dall'immagine
+            lightbox.addEventListener("click", (event) => {
+                if (event.target === lightbox) {
+                    lightbox.style.display = "none";
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

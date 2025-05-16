@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sessioni di Studio | TeachUp</title>
+  
+  <!-- Firebase Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Animate.css -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  
+  <!-- Base CSS -->
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- Specific CSS -->
+  <link rel="stylesheet" href="sessioni.css">
+  
+  <!-- Inizializzazione Firebase -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBqsZJRx4G0swuOj7bNAazhnFb4cqeR7XQ",
+      authDomain: "teachup-62984.firebaseapp.com",
+      projectId: "teachup-62984",
+      storageBucket: "teachup-62984.firebasestorage.app",
+      messagingSenderId: "489486073804",
+      appId: "1:489486073804:web:634545fbdbaeadaaf1a769"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    
+    // Inizializza Firestore
+    const db = firebase.firestore();
+  </script>
+</head>
+<body>
+  <!-- Toast per notifiche -->
+  <div id="toast" class="toast"><i class="fas fa-info-circle"></i><span id="toastMessage"></span></div>
+
+  <!-- Modale di conferma eliminazione -->
+  <div id="deleteModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-title"><i class="fas fa-exclamation-triangle" style="color: #f44336;"></i> Eliminare sessione?</div>
+      <div class="modal-text">Sei sicuro di voler eliminare definitivamente questa sessione? Questa azione non può essere annullata.</div>
+      <div class="modal-buttons">
+        <button class="modal-button modal-cancel" onclick="hideDeleteModal()">Annulla</button>
+        <button class="modal-button modal-delete" onclick="confirmDeleteSession()">Elimina</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modale di conferma modifica stato -->
+  <div id="statusModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-title"><i class="fas fa-exchange-alt" style="color: #6200ea;"></i> <span id="statusModalTitle">Cambiare stato?</span></div>
+      <div class="modal-text" id="statusModalText">Sei sicuro di voler cambiare lo stato di questa sessione?</div>
+      <div class="modal-buttons">
+        <button class="modal-button modal-cancel" onclick="hideStatusModal()">Annulla</button>
+        <button class="modal-button primary-button" onclick="confirmChangeStatus()">Conferma</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Verifica login -->
+  <script>
+    firebase.auth().onAuthStateChanged((user) => {
+      if (!user) {
+        showToast("Devi effettuare il login per accedere a questa pagina", "error");
+        setTimeout(() => {
+          window.location.href = "../../Login/prova.html";
+        }, 2000);
+      }
+    });
+    
+    // Toast per notifiche
+    function showToast(message, type = 'info', duration = 3000) {
+      const toast = document.getElementById("toast");
+      
+      // Rimuovi classi esistenti
+      toast.classList.remove("success", "error");
+      
+      // Aggiungi icona e classe appropriata
+      let icon = '<i class="fas fa-info-circle"></i>';
+      
+      if (type === 'success') {
+        toast.classList.add("success");
+        icon = '<i class="fas fa-check-circle"></i>';
+      } else if (type === 'error') {
+        toast.classList.add("error");
+        icon = '<i class="fas fa-exclamation-circle"></i>';
+      }
+      
+      // Aggiorna messaggio e icona
+      toast.innerHTML = icon + message;
+      
+      // Mostra il toast
+      toast.classList.add("show");
+      
+      // Nascondi dopo il tempo specificato
+      setTimeout(() => {
+        toast.classList.remove("show");
+      }, duration);
+    }
+  </script>
+  
+  <!--Menu mobile-->
+  <div id="menuMobile" class="menu-mobile animate__animated">
+    <span class="close-menu" onclick="toggleMenu()">×</span>
+    <div class="logo-container">
+      <img src="../Immagini/Logo.png" alt="TeachUp Logo" class="logo">
+    </div>
+    <a href="../Home-Page/Home-Page.html"><i class="fas fa-home"></i> Home</a>
+    <a href="../Sessioni/Sessioni.html"><i class="fas fa-video"></i> Sessioni</a>
+    <a href="../Chat/Chat.html"><i class="fas fa-comments"></i> Chat</a>
+    <a href="../Account/Account.html"><i class="fas fa-user"></i> Account</a>
+  </div>
+
+  <div class="gap">
+    <span class="menu-toggle" onclick="toggleMenu()">☰</span>
+  </div>
+
+  <!--PC-->
+  <nav class="navbar animate__animated animate__fadeIn">
+    <ul>
+      <li><a href="../Home-Page/Home-Page.html"><i class="fas fa-home"></i> Home</a></li>
+      <li><a href="../Sessioni/Sessioni.html"><i class="fas fa-video"></i> Sessioni</a></li>
+      <li><a href="../Chat/Chat.html"><i class="fas fa-comments"></i> Chat</a></li>
+      <li><a href="../Account/Account.html"><i class="fas fa-user"></i> Account</a></li>
+    </ul>
+  </nav>
+  
+  <div class="container animate__animated animate__fadeIn">
+    <h3><i class="fas fa-video"></i> Sessioni di Studio</h3>
+    
+    <!-- Filtri e ricerca -->
+    <div class="filters">
+      <div style="position: relative; flex: 1;">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" id="searchInput" class="search-input" placeholder="Cerca sessione...">
+      </div>
+      
+      <select id="statusFilter" class="filter-select">
+        <option value="all">Tutti gli stati</option>
+        <option value="Online">Online</option>
+        <option value="Offline">Offline</option>
+      </select>
+      
+      <select id="privacyFilter" class="filter-select">
+        <option value="all">Tutte le sessioni</option>
+        <option value="public">Pubbliche</option>
+        <option value="private">Private</option>
+      </select>
+    </div>
+    
+    <!-- Tabella sessioni -->
+    <table id="serverTable">
+      <thead>
+        <tr>
+          <th>Nome Sessione</th>
+          <th>Partecipanti</th>
+          <th>Stato</th>
+          <th>Creatore</th>
+        </tr>
+      </thead>
+      <tbody id="sessionsTableBody">
+        <tr class="loading-row">
+          <td colspan="4">
+            <div class="spinner"></div>
+            <p style="margin-top: 10px;">Caricamento sessioni...</p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Pulsanti azione -->
+    <div class="action-buttons">
+      <button id="joinButton" class="action-button primary-button" onclick="joinSelectedSession()" disabled>
+        <i class="fas fa-sign-in-alt"></i> Partecipa
+      </button>
+      
+      <!-- Pulsante per cambiare stato (visibile solo al creatore) -->
+      <button id="statusButton" class="action-button status-button" onclick="showStatusModal()" disabled style="display: none;">
+        <i class="fas fa-power-off"></i> <span id="statusButtonText">Cambia Stato</span>
+      </button>
+      
+      <!-- Pulsante di eliminazione (visibile solo al creatore) -->
+      <button id="deleteButton" class="action-button delete-button" onclick="showDeleteModal()" disabled style="display: none;">
+        <i class="fas fa-trash-alt"></i> Elimina Sessione
+      </button>
+      
+      <button id="createButton" class="action-button secondary-button" onclick="createNewSession()">
+        <i class="fas fa-plus"></i> Crea Nuova Sessione
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Variabili globali
+    let selectedSession = null;
+    let selectedSessionId = null;
+    let sessionsData = {};
+    let currentUserIsCreator = false;
+    
+    // Toggle menu mobile
+    function toggleMenu() {
+      const menu = document.getElementById("menuMobile");
+      if (menu.classList.contains("animate__slideInLeft")) {
+        menu.classList.remove("animate__slideInLeft");
+        menu.classList.add("animate__slideOutLeft");
+        setTimeout(() => {
+          menu.style.display = "none";
+        }, 500);
+      } else {
+        menu.style.display = "block";
+        menu.classList.remove("animate__slideOutLeft");
+        menu.classList.add("animate__slideInLeft");
+      }
+    }
+    
+    // Carica le sessioni da Firestore
+    function loadSessions() {
+      const tbody = document.getElementById("sessionsTableBody");
+      const searchInput = document.getElementById("searchInput");
+      const statusFilter = document.getElementById("statusFilter");
+      const privacyFilter = document.getElementById("privacyFilter");
+      
+      // Ascolta in tempo reale le sessioni
+      db.collection("sessioni")
+        .orderBy("timestamp", "desc")
+        .onSnapshot((snapshot) => {
+          // Salva i dati delle sessioni
+          sessionsData = {};
+          snapshot.forEach(doc => {
+            sessionsData[doc.id] = {...doc.data(), id: doc.id};
+          });
+          
+          // Applica i filtri
+          applyFilters();
+          
+          // Aggiungi listener ai filtri
+          searchInput.addEventListener("input", applyFilters);
+          statusFilter.addEventListener("change", applyFilters);
+          privacyFilter.addEventListener("change", applyFilters);
+        }, error => {
+          console.error("Errore nel caricamento delle sessioni:", error);
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="4" style="text-align: center; padding: 20px; color: #f44336;">
+                <i class="fas fa-exclamation-circle" style="font-size: 24px; margin-bottom: 10px;"></i>
+                <p>Errore nel caricamento delle sessioni. Riprova più tardi.</p>
+              </td>
+            </tr>
+          `;
+        });
+    }
+    
+    // Applica filtri alle sessioni
+    function applyFilters() {
+      const tbody = document.getElementById("sessionsTableBody");
+      const searchTerm = document.getElementById("searchInput").value.toLowerCase();
+      const statusValue = document.getElementById("statusFilter").value;
+      const privacyValue = document.getElementById("privacyFilter").value;
+      
+      // Filtra le sessioni
+      const filteredSessions = Object.values(sessionsData).filter(session => {
+        return (
+          (searchTerm === "" || session.name.toLowerCase().includes(searchTerm)) &&
+          (statusValue === "all" || session.status === statusValue) &&
+          (privacyValue === "all" || session.privacy === privacyValue)
+        );
+      });
+      
+      // Aggiorna la tabella
+      updateTable(filteredSessions);
+    }
+    
+    // Aggiorna la tabella con le sessioni filtrate
+    function updateTable(sessions) {
+      const tbody = document.getElementById("sessionsTableBody");
+      tbody.innerHTML = "";
+      
+      // Se non ci sono sessioni
+      if (sessions.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="4">
+              <div class="empty-state">
+                <div class="empty-state-icon"><i class="fas fa-video-slash"></i></div>
+                <div class="empty-state-title">Nessuna sessione trovata</div>
+                <div class="empty-state-text">Non sono state trovate sessioni corrispondenti ai filtri. Prova a cambiare i filtri o crea una nuova sessione.</div>
+                <button class="action-button primary-button" onclick="createNewSession()">
+                  <i class="fas fa-plus"></i> Crea Nuova Sessione
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+      
+      // Ottieni l'ID dell'utente corrente
+      const currentUser = firebase.auth().currentUser;
+      const currentUserId = currentUser ? currentUser.uid : null;
+      
+      // Aggiungi le sessioni alla tabella
+      sessions.forEach(session => {
+        const tr = document.createElement("tr");
+        tr.className = "server-row";
+        tr.setAttribute("data-session-id", session.id);
+        tr.onclick = () => selectSession(tr, session.id);
+        
+        // Badge per sessioni private
+        const privateBadge = session.privacy === "private" 
+          ? '<span class="private-badge">Privata</span>' 
+          : '';
+        
+        // Badge per creatore
+        const isCreator = session.createdBy === currentUserId;
+        const creatorBadge = isCreator
+          ? '<span class="creator-badge">Tu</span>'
+          : '';
+        
+        // Classe per stato
+        const statusClass = session.status === "Online" 
+          ? "status-online" 
+          : "status-offline";
+        
+        tr.innerHTML = `
+          <td>${session.name} ${privateBadge} ${creatorBadge}</td>
+          <td>${session.participants}</td>
+          <td class="${statusClass}">${session.status}</td>
+          <td>${session.creatorName || "Utente"}</td>
+        `;
+        
+        tbody.appendChild(tr);
+      });
+      
+      // Reseleziona la sessione se era selezionata
+      if (selectedSessionId) {
+        const rows = tbody.querySelectorAll("tr");
+        rows.forEach(row => {
+          if (row.getAttribute("data-session-id") === selectedSessionId) {
+            selectSession(row, selectedSessionId);
+          }
+        });
+      }
+    }
+    
+    // Seleziona una sessione
+    function selectSession(row, sessionId) {
+      const joinButton = document.getElementById("joinButton");
+      const deleteButton = document.getElementById("deleteButton");
+      const statusButton = document.getElementById("statusButton");
+      
+      if (selectedSession === row) {
+        // Deseleziona
+        row.classList.remove("selected");
+        selectedSession = null;
+        selectedSessionId = null;
+        joinButton.disabled = true;
+        deleteButton.disabled = true;
+        statusButton.disabled = true;
+        
+        // Nascondi pulsanti creatore
+        deleteButton.style.display = "none";
+        statusButton.style.display = "none";
+        
+        // Reset flag
+        currentUserIsCreator = false;
+        
+        return;
+      }
+      
+      // Deseleziona la precedente
+      const rows = document.querySelectorAll("#sessionsTableBody tr");
+      rows.forEach(r => r.classList.remove("selected"));
+      
+      // Seleziona la nuova
+      row.classList.add("selected");
+      selectedSession = row;
+      selectedSessionId = sessionId;
+      joinButton.disabled = false;
+      
+      // Verifica se l'utente è il creatore
+      const currentUser = firebase.auth().currentUser;
+      const session = sessionsData[sessionId];
+      
+      if (session && session.createdBy === currentUser.uid) {
+        currentUserIsCreator = true;
+        
+        // Mostra pulsanti di gestione
+        deleteButton.disabled = false;
+        statusButton.disabled = false;
+        deleteButton.style.display = "flex";
+        statusButton.style.display = "flex";
+        
+        // Aggiorna testo e stile del pulsante di stato
+        updateStatusButton(session.status);
+      } else {
+        currentUserIsCreator = false;
+        
+        // Nascondi pulsanti di gestione
+        deleteButton.style.display = "none";
+        statusButton.style.display = "none";
+      }
+    }
+    
+    // Aggiorna l'aspetto del pulsante di stato
+    function updateStatusButton(status) {
+      const statusButton = document.getElementById("statusButton");
+      const statusButtonText = document.getElementById("statusButtonText");
+      
+      if (status === "Online") {
+        statusButton.classList.add("offline");
+        statusButtonText.textContent = "Porta Offline";
+      } else {
+        statusButton.classList.remove("offline");
+        statusButtonText.textContent = "Porta Online";
+      }
+    }
+    
+    // Partecipa alla sessione selezionata
+    function joinSelectedSession() {
+      if (!selectedSessionId || !sessionsData[selectedSessionId]) {
+        showToast("Seleziona prima una sessione", "error");
+        return;
+      }
+      
+      const session = sessionsData[selectedSessionId];
+      
+      // Se la sessione è offline e l'utente non è il creatore, non permettere di partecipare
+      if (session.status === "Offline" && !currentUserIsCreator) {
+        showToast("Questa sessione è offline", "error");
+        return;
+      }
+      
+      // Verifica se la sessione è piena
+      const [current, max] = session.participants.split("/").map(Number);
+      if (current >= max && !currentUserIsCreator) {
+        showToast("La sessione è piena", "error");
+        return;
+      }
+      
+      // Verifica se l'utente è già nella sessione
+      const currentUser = firebase.auth().currentUser;
+      if (session.participantsArray && session.participantsArray.includes(currentUser.uid)) {
+        // Già partecipante, vai direttamente alla videochiamata
+        window.location.href = `videochiamata.html?sessionId=${selectedSessionId}`;
+        return;
+      }
+      
+      // Aggiorna i partecipanti
+      updateParticipants(selectedSessionId, true)
+        .then(() => {
+          // Vai alla videochiamata
+          window.location.href = `videochiamata.html?sessionId=${selectedSessionId}`;
+        })
+        .catch(error => {
+          console.error("Errore nell'aggiornamento dei partecipanti:", error);
+          showToast("Errore nell'unirsi alla sessione", "error");
+        });
+    }
+    
+    // Aggiorna il conteggio dei partecipanti
+    function updateParticipants(sessionId, isJoining) {
+      return db.collection("sessioni").doc(sessionId).get()
+        .then(doc => {
+          if (!doc.exists) throw new Error("Sessione non trovata");
+          
+          const sessionData = doc.data();
+          const [current, max] = sessionData.participants.split("/").map(Number);
+          
+          let newCount = isJoining 
+            ? Math.min(current + 1, max) 
+            : Math.max(current - 1, 0);
+          
+          let participantsArray = sessionData.participantsArray || [];
+          const currentUser = firebase.auth().currentUser;
+          
+          if (isJoining && !participantsArray.includes(currentUser.uid)) {
+            participantsArray.push(currentUser.uid);
+          } else if (!isJoining && participantsArray.includes(currentUser.uid)) {
+            participantsArray = participantsArray.filter(uid => uid !== currentUser.uid);
+          }
+          
+          // Aggiorna il documento della sessione
+          return db.collection("sessioni").doc(sessionId).update({
+            participants: `${newCount}/${max}`,
+            participantsArray: participantsArray,
+            status: newCount > 0 ? "Online" : "Offline"
+          });
+        })
+        .then(() => {
+          // Aggiorna anche i dati dell'utente
+          const currentUser = firebase.auth().currentUser;
+          if (isJoining) {
+            return db.collection("utenti").doc(currentUser.uid).set({
+              sessions: {
+                [sessionId]: {
+                  joined: firebase.firestore.FieldValue.serverTimestamp(),
+                  role: "participant"
+                }
+              }
+            }, { merge: true });
+          }
+        });
+    }
+    
+    // Vai alla pagina di creazione videochiamata
+    function createNewSession() {
+      window.location.href = "configura_videochiamata.html";
+    }
+    
+    // Mostra il modale di conferma eliminazione
+    function showDeleteModal() {
+      if (!selectedSessionId || !currentUserIsCreator) return;
+      document.getElementById("deleteModal").style.display = "block";
+    }
+    
+    // Nascondi il modale di eliminazione
+    function hideDeleteModal() {
+      document.getElementById("deleteModal").style.display = "none";
+    }
+    
+    // Conferma eliminazione sessione
+    function confirmDeleteSession() {
+      if (!selectedSessionId || !currentUserIsCreator) {
+        hideDeleteModal();
+        return;
+      }
+      
+      const session = sessionsData[selectedSessionId];
+      
+      // Se ci sono partecipanti attivi, avvisa l'utente
+      const [current, max] = session.participants.split("/").map(Number);
+      if (current > 0 && session.status === "Online") {
+        // Chiedi ulteriore conferma
+        if (!confirm("La sessione ha partecipanti attivi. Procedendo, tutti saranno disconnessi. Continuare?")) {
+          hideDeleteModal();
+          return;
+        }
+      }
+      
+      // Elimina la sessione
+      db.collection("sessioni").doc(selectedSessionId).delete()
+        .then(() => {
+          showToast("Sessione eliminata con successo", "success");
+          hideDeleteModal();
+          
+          // Deseleziona
+          selectedSession = null;
+          selectedSessionId = null;
+          currentUserIsCreator = false;
+          
+          // Disabilita pulsanti
+          document.getElementById("joinButton").disabled = true;
+          document.getElementById("deleteButton").disabled = true;
+          document.getElementById("statusButton").disabled = true;
+          
+          // Nascondi pulsanti del creatore
+          document.getElementById("deleteButton").style.display = "none";
+          document.getElementById("statusButton").style.display = "none";
+        })
+        .catch(error => {
+          console.error("Errore nell'eliminazione della sessione:", error);
+          showToast("Errore nell'eliminazione della sessione", "error");
+          hideDeleteModal();
+        });
+    }
+    
+    // Mostra il modale di cambio stato
+    function showStatusModal() {
+      if (!selectedSessionId || !currentUserIsCreator) return;
+      
+      const session = sessionsData[selectedSessionId];
+      const statusModalTitle = document.getElementById("statusModalTitle");
+      const statusModalText = document.getElementById("statusModalText");
+      
+      // Aggiorna il titolo e il testo in base allo stato corrente
+      if (session.status === "Online") {
+        statusModalTitle.textContent = "Portare offline la sessione?";
+        statusModalText.textContent = "La sessione non sarà più visibile agli altri utenti. I partecipanti attivi verranno disconnessi. Vuoi continuare?";
+      } else {
+        statusModalTitle.textContent = "Portare online la sessione?";
+        statusModalText.textContent = "La sessione sarà visibile a tutti gli utenti. Vuoi continuare?";
+      }
+      
+      // Mostra il modale
+      document.getElementById("statusModal").style.display = "block";
+    }
+    
+    // Nascondi il modale di cambio stato
+    function hideStatusModal() {
+      document.getElementById("statusModal").style.display = "none";
+    }
+    
+    // Conferma cambio stato sessione
+    function confirmChangeStatus() {
+      if (!selectedSessionId || !currentUserIsCreator) {
+        hideStatusModal();
+        return;
+      }
+      
+      const session = sessionsData[selectedSessionId];
+      const newStatus = session.status === "Online" ? "Offline" : "Online";
+      
+      // Se stiamo mettendo offline e ci sono partecipanti, li disconnettiamo
+      let participants = session.participantsArray || [];
+      let participantsCount = `0/${session.participants.split('/')[1]}`;
+      
+      if (newStatus === "Offline") {
+        // Se stiamo portando offline, rimuoviamo tutti i partecipanti
+        participants = []; // Solo il creatore rimane
+        participantsCount = `0/${session.participants.split('/')[1]}`;
+      }
+      
+      // Aggiorna lo stato della sessione
+      db.collection("sessioni").doc(selectedSessionId).update({
+        status: newStatus,
+        participantsArray: newStatus === "Offline" ? [] : participants,
+        participants: newStatus === "Offline" ? participantsCount : session.participants
+      })
+      .then(() => {
+        showToast(`Sessione portata ${newStatus === "Online" ? "online" : "offline"} con successo`, "success");
+        hideStatusModal();
+        
+        // Aggiorna il pulsante di stato
+        updateStatusButton(newStatus);
+      })
+      .catch(error => {
+        console.error("Errore nel cambio stato della sessione:", error);
+        showToast("Errore nel cambio stato della sessione", "error");
+        hideStatusModal();
+      });
+    }
+    
+    // Carica le sessioni al caricamento della pagina
+    document.addEventListener("DOMContentLoaded", loadSessions);
+  </script>
+</body>
+</html>

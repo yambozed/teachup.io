@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeachUp Chat</title>
+    
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <!-- Base CSS -->
+    <link rel="stylesheet" href="../../Pagine/Sessioni/style.css">
+    
+    <!-- Chat specific CSS -->
+    <link rel="stylesheet" href="chat.css">
+</head>
+<body>
+    <!-- Toast per notifiche -->
+    <div id="toast" class="toast"><i class="fas fa-info-circle"></i><span id="toastMessage"></span></div>
+
+    <!-- Modale per creare nuova chat -->
+    <div id="newChatModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-title"><i class="fas fa-comments" style="color: var(--primary);"></i> Nuova Conversazione</div>
+            <div class="modal-form">
+                <div class="form-group">
+                    <label for="userSearchInput">Cerca utente</label>
+                    <input type="text" id="userSearchInput" placeholder="Cerca per nome, cognome o email...">
+                    <p class="form-hint">Inserisci almeno 3 caratteri per iniziare la ricerca</p>
+                </div>
+                
+                <div id="userSearchResults" class="user-search-results">
+                    <!-- Risultati di ricerca generati dinamicamente -->
+                </div>
+                
+                <div class="form-group" id="messageFormGroup" style="display: none;">
+                    <label for="initialMessage">Messaggio iniziale (opzionale)</label>
+                    <textarea id="initialMessage" placeholder="Scrivi un messaggio per presentarti..." rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-button modal-cancel" onclick="hideNewChatModal()">Annulla</button>
+                <button id="sendRequestButton" class="modal-button modal-create" onclick="sendChatRequest()" disabled>
+                    Invia Richiesta
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale per creare nuova chat di gruppo -->
+    <div id="newGroupChatModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-title"><i class="fas fa-users" style="color: var(--primary);"></i> Nuova Chat di Gruppo</div>
+            <div class="modal-form">
+                <div class="form-group">
+                    <label for="groupName">Nome del gruppo</label>
+                    <input type="text" id="groupName" placeholder="Inserisci un nome per il gruppo...">
+                </div>
+                
+                <div class="form-group">
+                    <label for="groupMemberSearch">Aggiungi membri</label>
+                    <input type="text" id="groupMemberSearch" placeholder="Cerca utenti da aggiungere...">
+                </div>
+                
+                <div id="groupMemberSearchResults" class="user-search-results">
+                    <!-- Risultati di ricerca generati dinamicamente -->
+                </div>
+                
+                <div class="form-group">
+                    <label>Membri selezionati (<span id="selectedMembersCount">0</span>)</label>
+                    <div id="selectedMembersList" class="selected-members-list">
+                        <!-- Membri selezionati generati dinamicamente -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-button modal-cancel" onclick="hideNewGroupModal()">Annulla</button>
+                <button id="createGroupButton" class="modal-button modal-create" onclick="createGroupChat()" disabled>
+                    Crea Gruppo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale per info chat -->
+    <div id="chatInfoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-title">
+                <i class="fas fa-info-circle" style="color: var(--primary);"></i> 
+                <span id="chatInfoTitle">Informazioni Chat</span>
+            </div>
+            <div id="chatInfoContent" class="chat-info-content">
+                <!-- Contenuto dinamico -->
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-button modal-cancel" onclick="hideChatInfoModal()">Chiudi</button>
+                <button id="leaveChatButton" class="modal-button modal-delete" onclick="leaveChat()" style="display: none;">
+                    <i class="fas fa-sign-out-alt"></i> Esci dalla chat
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!--Menu mobile-->
+    <div id="menuMobile" class="menu-mobile animate__animated">
+        <span class="close-menu" onclick="toggleMenu()">×</span>
+        <div class="logo-container">
+            <img src="../Immagini/Logo.png" alt="TeachUp Logo" class="logo">
+        </div>
+        <a href="../Home-Page/Home-Page.html"><i class="fas fa-home"></i> Home</a>
+        <a href="../Sessioni/Sessioni.html"><i class="fas fa-video"></i> Sessioni</a>
+        <a href="../Chat/Chat.html"><i class="fas fa-comments"></i> Chat</a>
+        <a href="../Account/Account.html"><i class="fas fa-user"></i> Account</a>
+    </div>
+
+    <div class="gap">
+        <span class="menu-toggle" onclick="toggleMenu()">☰</span>
+    </div>
+
+    <!--PC-->
+    <nav class="navbar animate__animated animate__fadeIn">
+        <ul>
+            <li><a href="../Home-Page/Home-Page.html"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="../Sessioni/Sessioni.html"><i class="fas fa-video"></i> Sessioni</a></li>
+            <li><a href="../Chat/Chat.html"><i class="fas fa-comments"></i> Chat</a></li>
+            <li><a href="../Account/Account.html"><i class="fas fa-user"></i> Account</a></li>
+        </ul>
+    </nav>
+
+    <div class="chat-container">
+        <!-- Sidebar delle chat -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="search-wrapper">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="searchInput" class="search-input" placeholder="Cerca chat...">
+                </div>
+                <button id="newChatButton" class="action-button" title="Nuova chat" onclick="showNewChatModal()">
+                    <i class="fas fa-comment-medical"></i>
+                </button>
+                <button id="newGroupButton" class="action-button" title="Nuova chat di gruppo" onclick="showNewGroupModal()">
+                    <i class="fas fa-users"></i>
+                </button>
+            </div>
+            
+            <div class="chat-tabs">
+                <div class="chat-tab active" data-tab="recent">Recenti</div>
+                <div class="chat-tab" data-tab="groups">Gruppi</div>
+                <div class="chat-tab" data-tab="private">Privati</div>
+            </div>
+            
+            <div class="chat-list-container">
+                <!-- Richieste di chat in attesa -->
+                <div id="chatRequestsContainer" class="chat-requests" style="display: none;">
+                    <div class="chat-request-header">
+                        <i class="fas fa-bell"></i> Richieste di conversazione
+                    </div>
+                    <div id="pendingChatRequests">
+                        <!-- Richieste di chat generate dinamicamente -->
+                    </div>
+                </div>
+                
+                <!-- Lista delle chat -->
+                <ul id="chatList" class="chat-list">
+                    <!-- Lista chat caricata dinamicamente -->
+                    <li class="chat-loading">
+                        <div class="spinner"></div>
+                        <p>Caricamento chat...</p>
+                    </li>
+                </ul>
+                
+                <!-- Stato vuoto -->
+                <div id="emptyChatState" class="empty-state" style="display: none;">
+                    <div class="empty-state-icon"><i class="fas fa-comments"></i></div>
+                    <div class="empty-state-title">Nessuna chat</div>
+                    <div class="empty-state-text">Non hai ancora nessuna chat attiva. Inizia una nuova conversazione!</div>
+                    <button class="action-button primary-button" onclick="showNewChatModal()">
+                        <i class="fas fa-plus"></i> Nuova Chat
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Area principale della chat -->
+        <div class="chat-box">
+            <!-- Header della chat -->
+            <div id="chatHeader" class="chat-header">
+                <div class="chat-header-info">
+                    <div id="chatName">Seleziona una chat</div>
+                    <div id="chatStatus" class="chat-status">...</div>
+                </div>
+                <div class="chat-header-actions">
+                    <button id="infoButton" class="header-action-button" title="Informazioni chat" onclick="showChatInfo()">
+                        <i class="fas fa-info-circle"></i>
+                    </button>
+                    <button id="toggleSidebarButton" class="header-action-button toggle-sidebar-button" title="Mostra chat" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Contenitore dei messaggi -->
+            <div id="chatMessages" class="chat-messages">
+                <div class="welcome-message">
+                    <div class="welcome-icon"><i class="fas fa-comments"></i></div>
+                    <h3>Benvenuto nelle chat di TeachUp</h3>
+                    <p>Seleziona una chat esistente dalla barra laterale o inizia una nuova conversazione.</p>
+                </div>
+            </div>
+            
+            <!-- Area di input -->
+            <div id="chatInputContainer" class="chat-input-container" style="display: none;">
+                <div class="chat-input">
+                    <button id="attachButton" class="input-action-button" title="Allega file">
+                        <i class="fas fa-paperclip"></i>
+                    </button>
+                    <textarea id="messageInput" placeholder="Scrivi un messaggio..." rows="1"></textarea>
+                    <button id="emojiButton" class="input-action-button" title="Emoji">
+                        <i class="far fa-smile"></i>
+                    </button>
+                    <button id="sendButton" class="send-button" disabled>
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+                
+                <!-- Anteprima file allegato -->
+                <div id="attachmentPreview" class="attachment-preview" style="display: none;">
+                    <div id="previewContent" class="preview-content"></div>
+                    <button id="removeAttachment" class="remove-attachment" title="Rimuovi allegato">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- File input nascosto per caricare allegati -->
+    <input type="file" id="fileInput" style="display: none;">
+
+    <!-- Inizializzazione Firebase -->
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBqsZJRx4G0swuOj7bNAazhnFb4cqeR7XQ",
+            authDomain: "teachup-62984.firebaseapp.com",
+            projectId: "teachup-62984",
+            storageBucket: "teachup-62984.appspot.com",
+            messagingSenderId: "489486073804",
+            appId: "1:489486073804:web:634545fbdbaeadaaf1a769"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        
+        // Inizializza Firestore e Storage
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+    </script>
+
+    <!-- Script principale -->
+    <script src="chat.js"></script>
+</body>
+</html>
